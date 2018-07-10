@@ -1,9 +1,11 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractCssChunks = require("extract-css-chunks-webpack-plugin");
+const path = require('path');
 
 module.exports = {
   entry: "./src/app.js",
   output: {
-    path: __dirname + '/dist',
+    path: path.resolve(__dirname, './dist'),
     filename: "bundle.js"
   },
   module: {
@@ -16,24 +18,29 @@ module.exports = {
         }
       },
       {
-        test: /\.css$/,
-        use: ["style-loader", "css-loader"]
-      },
-      {
         test: /\.less$/,
-        use: ["style-loader", "css-loader", "less-loader"]
+        use: [{
+                loader: ExtractCssChunks.loader // creates style nodes from JS strings
+            }, {
+                loader: "css-loader" // translates CSS into CommonJS
+            }, {
+                loader: "less-loader" // compiles Less to CSS
+            }]
       }
 
     ]
   },
   plugins: [
-     new HtmlWebpackPlugin({template: './index.html'})
+     new HtmlWebpackPlugin({template: './index.html'}),
+     new ExtractCssChunks({
+       path: path.resolve(__dirname, './dist'),
+       filename: "styles.css",
+       hot: true
+     })
   ],
-  mode: 'development',
+  mode: 'production',
+
   devServer: {
            contentBase: __dirname + '/dist',
-           port: 3000,
-           open: true,
-           openPage: ''
          }
 };
